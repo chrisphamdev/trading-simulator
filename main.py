@@ -16,13 +16,23 @@ def update_holdings_db(users_dict):
 def create_profile(user_id, bal):
     holdings_db = get_holdings_db()
     all_user_ids = holdings_db.keys()
+    start_bal = bal.copy()
 
     if str(user_id) in all_user_ids:
         return 'ID existed.'
     
-    holdings_db[user_id] = [bal, {}]
+    holdings_db[user_id] = [bal, {}, start_bal]
     update_holdings_db(holdings_db)
     return 'Successful.'
+
+def check_user_existed(user_id):
+    holdings_db = get_holdings_db()
+    all_user_ids = holdings_db.keys()
+
+    if str(user_id) in all_user_ids:
+        return True
+    else:
+        return False
 
 
 def buy_stock(buyer_id, symbol, amount):
@@ -35,25 +45,26 @@ def buy_stock(buyer_id, symbol, amount):
     user_balance = user[0]
     user_holdings = user[1]
 
-    stock = Stock(symbol)
-    current_price = stock.current_price()
-    amount_in_shares = amount/current_price
 
-    if user_balance >= amount:
+    if user_balance < amount:
+        return 'Insufficient balance.'
+    else:
+        stock = Stock(symbol)
+        current_price = stock.current_price()
+        amount_in_shares = amount/current_price
+
         if stock.symbol in user_holdings.keys():
             user_balance -= current_price*amount_in_shares # did not use amount because of rounding
             user_holdings[stock.symbol] += amount_in_shares
         else:
             user_balance -= current_price*amount_in_shares # did not use amount because of rounding
             user_holdings[stock.symbol] = amount_in_shares
-    else:
-        return 'Insufficient balance.'
-    
-    
+        
     updated_user = [round(user_balance, 2), user_holdings]
     all_holdings[buyer_id] = updated_user
     update_holdings_db(all_holdings)
-    return 'Successful.'
+    return round(amount_in_shares, 2)
+    
     
 def sell_stock(buyer_id, symbol, amount):
     buyer_id = str(buyer_id)
@@ -82,7 +93,7 @@ def sell_stock(buyer_id, symbol, amount):
     updated_user = [user_balance, user_holdings]
     all_holdings[buyer_id] = updated_user
     update_holdings_db(all_holdings)
-    return 'Successful.'
+    return amount
 
 def sell_all_stock(buyer_id, symbol):
     buyer_id = str(buyer_id)
@@ -134,4 +145,5 @@ def get_summary(user_id):
     user = all_holdings[user_id]
     user_balance = user[0]
     user_holdings = user[1]
-    return [user_balance, user_holdings]
+    start_balance = user[2]
+    return [user_balance, user_holdings, start_balance]
