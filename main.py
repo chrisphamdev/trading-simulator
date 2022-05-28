@@ -16,7 +16,7 @@ def update_holdings_db(users_dict):
 def create_profile(user_id, bal):
     holdings_db = get_holdings_db()
     all_user_ids = holdings_db.keys()
-    start_bal = bal.copy()
+    start_bal = float(bal)
 
     if str(user_id) in all_user_ids:
         return 'ID existed.'
@@ -24,6 +24,8 @@ def create_profile(user_id, bal):
     holdings_db[user_id] = [bal, {}, start_bal]
     update_holdings_db(holdings_db)
     return 'Successful.'
+
+
 
 def check_user_existed(user_id):
     holdings_db = get_holdings_db()
@@ -44,6 +46,7 @@ def buy_stock(buyer_id, symbol, amount):
     user = all_holdings[buyer_id]
     user_balance = user[0]
     user_holdings = user[1]
+    start_balance = user[2]
 
 
     if user_balance < amount:
@@ -60,7 +63,7 @@ def buy_stock(buyer_id, symbol, amount):
             user_balance -= current_price*amount_in_shares # did not use amount because of rounding
             user_holdings[stock.symbol] = amount_in_shares
         
-    updated_user = [round(user_balance, 2), user_holdings]
+    updated_user = [round(user_balance, 2), user_holdings, start_balance]
     all_holdings[buyer_id] = updated_user
     update_holdings_db(all_holdings)
     return round(amount_in_shares, 2)
@@ -76,6 +79,7 @@ def sell_stock(buyer_id, symbol, amount):
     user = all_holdings[buyer_id]
     user_balance = user[0]
     user_holdings = user[1]
+    start_balance = user[2]
 
     if symbol.upper() in user_holdings.keys():
         stock = Stock(symbol)
@@ -90,7 +94,7 @@ def sell_stock(buyer_id, symbol, amount):
     if user_holdings[stock.symbol] == 0:
         user_holdings.pop(stock.symbol)
     
-    updated_user = [user_balance, user_holdings]
+    updated_user = [user_balance, user_holdings, start_balance]
     all_holdings[buyer_id] = updated_user
     update_holdings_db(all_holdings)
     return amount
@@ -104,6 +108,7 @@ def sell_all_stock(buyer_id, symbol):
     user = all_holdings[buyer_id]
     user_balance = user[0]
     user_holdings = user[1]
+    start_balance = user[2]
 
     if symbol.upper() in user_holdings.keys():
         stock = Stock(symbol)
@@ -112,7 +117,7 @@ def sell_all_stock(buyer_id, symbol):
     else:
         return 'You don\'t own any share of this company.'
           
-    updated_user = [user_balance, user_holdings]
+    updated_user = [user_balance, user_holdings, start_balance]
     all_holdings[buyer_id] = updated_user
     update_holdings_db(all_holdings)
     return 'Successful.'

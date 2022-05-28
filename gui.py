@@ -4,13 +4,13 @@ from main import *
 from yahoo_fin import stock_info
 
 
-sg.theme('DarkAmber')   
+sg.theme('TealMono')   
 
 
 login_section = [  [sg.Text('Login to Trading Simulator')],
             [sg.Text('ID', size=(15,1)), sg.InputText(enable_events=True, key='USERID')],
             [sg.Button('Login', enable_events=True, key='LOGINBUTTON')],
-            [sg.Text('_'  * 100, size=(65, 1))]
+            [sg.Text('_'  * 65)]
 ]
 
 register_section = [
@@ -18,7 +18,7 @@ register_section = [
     [sg.Text('ID', size=(15,1)), sg.InputText(enable_events=True, key='REGISTERID')],
     [sg.Text('Starting balance', size=(15,1)), sg.InputText(enable_events=True, key='STARTBAL')],
     [sg.Button('Register', enable_events=True, key='REGISTERBUTTON')],
-    [sg.Text('_'  * 100, size=(65, 1))]
+    [sg.Text('_'  * 65)]
 ]
 
 # Main section where the user can buy, sell, view summary
@@ -37,10 +37,10 @@ action_section = [
     [buy_button, sell_button, sell_all_button, summary_button, help_button]
 ]
 
-output_section = [sg.Output(size=(60,20), key='OUTPUTBOX')]
+output_section = [sg.Output(size=(62,20), key='OUTPUTBOX')]
 main_layout = [login_section, register_section, action_section, output_section]
 # Create the Window
-window = sg.Window('Trading Simulator', main_layout, margins=(50, 50))
+window = sg.Window('Trading Simulator', main_layout)
 # Event Loop to process "events" and get the "values" of the inputs
 
 current_user_id = None
@@ -133,8 +133,8 @@ while True:
             capital = user_balance
 
             output = 'PORTFOLIO SUMMARY\n\n'
-            output += '{:<20}| {:<10} | {:<10} | {:<10}\n'.format('    Company name', '  Symbol', 'Share owned', 'Current value')
-            output += '-'*80 + '\n'
+            output += '{:<30}| {:<12} | {:<12} | {:<12}\n'.format('    Company name', '  Symbol', 'Share owned', 'Current value')
+            output += '-'*103 + '\n'
             for symbol in holdings:
                 company_name = yf.Ticker(symbol.upper()).info['longName']
                 if len(company_name) >= 15:
@@ -143,13 +143,13 @@ while True:
                 current_price = stock_info.get_live_price(symbol)
                 current_value = current_price*holdings[symbol]
                 capital += current_value
-                line = '{:<20}| {:<10} | {:<10.2f}  | {:<10.2f}\n'.format(company_name, symbol.upper(), holdings[symbol], current_value)
+                line = '  {:<35}|  {:<13}| {:<17.2f}| {:<12.2f}\n'.format(company_name, symbol.upper(), holdings[symbol], current_value)
                 output += line
             
-            output += '-'*80 + '\n\n'
-            output += 'WALLET          : ${:.2f}\n'.format(user_balance)
-            output += 'CAPITAL         : ${:.2f}\n'.format(capital, 2)
-            output += 'TOTAL GAIN   : {}%'.format(round((capital/start_bal - 1)*100))
+            output += '-'*103 + '\n\n'
+            output += 'WALLET: {:>20}${:.2f}\n'.format('',user_balance)
+            output += 'CAPITAL: {:>20}${:.2f}\n'.format('',capital)
+            output += 'TOTAL GAIN: {:>18.2f}%'.format((capital/start_bal - 1)*100)
             window['OUTPUTBOX'].update(output)
 
 
